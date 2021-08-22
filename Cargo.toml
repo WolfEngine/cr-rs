@@ -13,6 +13,7 @@ path = "src/lib.rs"
 
 [dependencies]
 cxx = {version = "1.0"}
+#libc = {version = "0.2"}
 
 [build-dependencies]
 cxx-build = {version = "1.0"}

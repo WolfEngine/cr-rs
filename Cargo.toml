@@ -1,0 +1,18 @@
+[package]
+authors = ["Pooya Eimandar <pooya.eimandar@gmail.com>", "Simin Badri <simin.badri@gmail.com>"]
+description = "A Rust wrapper over cr.h: A Simple C Hot Reload Header-only Library"
+edition = "2018"
+license = "MIT"
+name = "cr-rs"
+repository = "https://github.com/WolfEngine/cr-rs"
+version = "0.1.0"
+
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]
+path = "src/lib.rs"
+
+[dependencies]
+cxx = {version = "1.0"}
+
+[build-dependencies]
+cxx-build = {version = "1.0"}

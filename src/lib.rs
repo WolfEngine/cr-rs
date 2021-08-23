@@ -66,6 +66,7 @@ pub mod cr {
 
 #[test]
 fn tests() -> () {
+    //let plugin = cr::plugin_new();
 
     // let plugin = unsafe { cr::plugin_new() };
     // println!("{:?}", plugin);

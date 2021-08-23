@@ -1,5 +1,5 @@
 [package]
-authors = ["Pooya Eimandar <pooya.eimandar@gmail.com>", "Simin Badri <simin.badri@gmail.com>"]
+authors = ["Pooya Eimandar <pooya.eimandar@gmail.com>"]
 description = "A Rust wrapper over cr.h: A Simple C Hot Reload Header-only Library"
 edition = "2018"
 license = "MIT"
@@ -12,8 +12,7 @@ crate-type = ["rlib", "cdylib", "staticlib"]
 path = "src/lib.rs"
 
 [dependencies]
-cxx = {version = "1.0"}
-#libc = {version = "0.2"}
+libc = {version = "0.2"}
 
 [build-dependencies]
-cxx-build = {version = "1.0"}
+cc = "1.0"

@@ -1,49 +1,59 @@
-#[cxx::bridge]
 pub mod cr {
-
-    #[derive(Debug)]
-    pub enum failure {
-        CR_NONE,              // No error
-        CR_SEGFAULT,          // SIGSEGV / EXCEPTION_ACCESS_VIOLATION
-        CR_ILLEGAL,           // illegal instruction (SIGILL) / EXCEPTION_ILLEGAL_INSTRUCTION
-        CR_ABORT,             // abort (SIGBRT)
-        CR_MISALIGN,          // bus error (SIGBUS) / EXCEPTION_DATATYPE_MISALIGNMENT
-        CR_BOUNDS,            // EXCEPTION_ARRAY_BOUNDS_EXCEEDED
-        CR_STACKOVERFLOW,     // EXCEPTION_STACK_OVERFLOW
-        CR_STATE_INVALIDATED, // one or more global data section changed and does
+    #[derive(Debug, Clone, Copy)]
+    #[repr(C)]
+    pub enum Failure {
+        CrNone,             // No error
+        CrSegfault,         // SIGSEGV / EXCEPTION_ACCESS_VIOLATION
+        CrIllegal,          // illegal instruction (SIGILL) / EXCEPTION_ILLEGAL_INSTRUCTION
+        CrAbort,            // abort (SIGBRT)
+        CrMisalign,         // bus error (SIGBUS) / EXCEPTION_DATATYPE_MISALIGNMENT
+        CrBounds,           // EXCEPTION_ARRAY_BOUNDS_EXCEEDED
+        CrStackoverflow,    // EXCEPTION_STACK_OVERFLOW
+        CrStateInvalidated, // one or more global data section changed and does
         // not safely match basically a failure of
         // cr_plugin_validate_sections
-        CR_BAD_IMAGE,       // The binary is not valid - compiler is still writing it
-        CR_INITIAL_FAILURE, // Plugin version 1 crashed, cannot rollback
-        CR_OTHER,           // Unknown or other signal,
-        CR_USER = 0x100,
+        CrBadImage,       // The binary is not valid - compiler is still writing it
+        CrInitialFailure, // Plugin version 1 crashed, cannot rollback
+        CrOther,          // Unknown or other signal,
+        CrUser = 0x100,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone, Copy)]
+    #[repr(C)]
     pub struct cr_plugin {
-        pub p: *mut void_ptr,        // opaque pointer for internal cr data;
-        pub userdata: *mut void_ptr, // may be used by the user to pass information between reloads;
-        pub version: u32, // incremetal number for each succeded reload, starting at 1 for the
-        // first load. **The version will change during a crash handling process**;
-        pub failure: failure, // used by the crash protection system, will hold the last failure error
-        // code that caused a rollback. See `cr_failure` for more info on possible values;
-        pub next_version: u32, // `next_version` for use by the next reload.
-        pub last_working_version: u32,
+        pub p: *mut libc::c_void,        // opaque pointer for internal cr data;
+        pub userdata: *mut libc::c_void, // may be used by the user to pass information between reloads;
+        pub version: u32, // incremetal number for each succeded reload, starting at 1 for the first load. **The version will change during a crash handling process**;
+        pub failure: Failure, // used by the crash protection system, will hold the last failure error code that caused a rollback. See `cr_failure` for more info on possible values;
+        pub next_version: u32, // for use by the next reload.
+        pub last_working_version: u32, // used by the lasted reload.
     }
 
-    unsafe extern "C++" {
+    extern "C" {
+        pub fn cr_plugin_open(pCtx: cr_plugin, pFullPath: *const libc::c_char) -> bool;
+        pub fn cr_plugin_update(pCtx: cr_plugin, pReloadCheck: bool) -> i32;
+        pub fn cr_plugin_close(pCtx: cr_plugin) -> ();
+    }
 
-        include!("cr-rs/src/cxx/cr.hpp");
+    pub fn plugin_new() -> cr_plugin {
+        unsafe {
+            let ctx: cr_plugin = std::mem::MaybeUninit::zeroed().assume_init();
+            ctx
+        }
+    }
 
-        //type
-        pub type void_ptr;
-        pub type cr_plugin;
+    pub fn plugin_open(p_ctx: cr_plugin, p_full_path: String) -> bool {
+        unsafe { cr_plugin_open(p_ctx, p_full_path.as_ptr() as *const libc::c_char) }
+    }
 
-        pub fn plugin_new() -> UniquePtr<cr_plugin>;
-        pub fn plugin_open(pCtx: UniquePtr<cr_plugin>, pFullPath: String) -> bool;
-        pub fn plugin_update(pCtx: UniquePtr<cr_plugin>, pReloadCheck: bool) -> i32;
-        pub fn plugin_close() -> ();
-        // pub fn set_temporary_path(fullpath: String) -> ();
+    pub fn plugin_update(p_ctx: cr_plugin, p_reload_check: bool) -> i32 {
+        unsafe { cr_plugin_update(p_ctx, p_reload_check) }
+    }
+
+    pub fn plugin_close(p_ctx: cr_plugin) -> () {
+        unsafe {
+            cr_plugin_close(p_ctx);
+        }
     }
 }
 
@@ -56,8 +66,14 @@ pub mod cr {
 
 #[test]
 fn tests() -> () {
-    let ctx = unsafe { cr::new_plugin() };
-    println!("{:?}", ctx);
+
+    // let plugin = unsafe { cr::plugin_new() };
+    // println!("{:?}", plugin);
+
+    // unsafe {
+    //
+    // };
+
     // let _dll_path = inner_main("basic_guest.dll").expect("Couldn't");
     // println!("{}", _dll_path.display());
 

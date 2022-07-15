@@ -32,7 +32,7 @@ pub mod cr {
     extern "C" {
         pub fn cr_plugin_open(pCtx: cr_plugin, pFullPath: *const libc::c_char) -> bool;
         pub fn cr_plugin_update(pCtx: cr_plugin, pReloadCheck: bool) -> i32;
-        pub fn cr_plugin_close(pCtx: cr_plugin) -> ();
+        pub fn cr_plugin_close(pCtx: cr_plugin);
     }
 
     pub fn plugin_new() -> cr_plugin {
@@ -50,7 +50,7 @@ pub mod cr {
         unsafe { cr_plugin_update(p_ctx, p_reload_check) }
     }
 
-    pub fn plugin_close(p_ctx: cr_plugin) -> () {
+    pub fn plugin_close(p_ctx: cr_plugin) {
         unsafe {
             cr_plugin_close(p_ctx);
         }
@@ -65,7 +65,7 @@ pub mod cr {
 // }
 
 #[test]
-fn tests() -> () {
+fn tests() {
     //let plugin = cr::plugin_new();
 
     // let plugin = unsafe { cr::plugin_new() };
